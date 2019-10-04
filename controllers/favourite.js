@@ -1,17 +1,30 @@
 const Favourite = require("../models/favourite");
 
 exports.addFavouriteResturant = (req, res, next) => {
-    const favourite = new Favourite({
+
+    Favourite.find({
         user: req.body.user,
         res_id: req.body.res_id
-    });
-    favourite
-        .save()
-        .then(result => {
-            res.status(201).json({
-                message: "resturant added to favourite list!",
-                result: result
-            });
+    }).
+    then(favourite => {
+            if (favourite.n>0) {
+                return res.status(401).json({
+                    message: "resturant add fail"
+                });
+            } else {
+                const favourite = new Favourite({
+                    user: req.body.user,
+                    res_id: req.body.res_id
+                });
+                favourite
+                    .save()
+                    .then(result => {
+                        res.status(201).json({
+                            message: "resturant added to favourite list!",
+                            result: result
+                        });
+                    })
+            }
         })
         .catch(err => {
             res.status(500).json({
@@ -44,17 +57,21 @@ exports.removeFavouriteResturant = (req, res, next) => {
 }
 
 exports.viewFavouriteResturant = (req, res, next) => {
-    Favourite.find({"user":req.params.id})
-    .then(favourite => {
-      if(favourite.n>0) {
-        res.status(200).json(favourite);
-      } else {
-        res.status(404).json({ message: "no resturant found!" });
-      }
-    })
-    .catch(error => {
-      res.status(500).json({
-        message: "Fetching resturant failed!"
-      });
-    });
+    Favourite.find({
+            "user": req.params.id
+        })
+        .then(favourite => {
+            if (favourite.n > 0) {
+                res.status(200).json(favourite);
+            } else {
+                res.status(404).json({
+                    message: "no resturant found!"
+                });
+            }
+        })
+        .catch(error => {
+            res.status(500).json({
+                message: "Fetching resturant failed!"
+            });
+        });
 }
